@@ -1,13 +1,19 @@
 async function fetchExcelData() {
     try {
-        const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/blob/main/Y22data.xlsx"; 
+        const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/main/Y22data.xlsx"; 
+        
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch Excel file");
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+            throw new Error("Invalid content type received. Check the file URL.");
+        }
 
         const data = await response.arrayBuffer();
         const workbook = XLSX.read(data, { type: "array" });
 
-        // Convert the first sheet into JSON format
+        // Convert first sheet into JSON format
         const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
         console.log("✅ Excel Data Loaded:", jsonData);
@@ -68,13 +74,15 @@ async function searchData() {
         return;
     }
 
-    // Generate table headers
+    // Generate table headers with a table row
     const headers = Object.keys(jsonData[0]);
+    const headerRow = document.createElement("tr");
     headers.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
-        tableHead.appendChild(th);
+        headerRow.appendChild(th);
     });
+    tableHead.appendChild(headerRow);
 
     // Populate table rows
     filteredData.forEach(row => {
