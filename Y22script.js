@@ -87,6 +87,7 @@ async function searchData() {
 
         if (highlightRow) {
             tr.style.backgroundColor = "yellow";
+            tr.style.setProperty("background-color", "yellow", "important"); // Ensure it applies
         }
 
         tableBody.appendChild(tr);
