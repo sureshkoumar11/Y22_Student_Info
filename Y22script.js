@@ -7,7 +7,6 @@ async function fetchExcelData() {
         const data = await response.arrayBuffer();
         const workbook = XLSX.read(data, { type: "array" });
 
-        // Convert the first sheet into JSON format
         const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
         console.log("✅ Excel Data Loaded:", jsonData);
@@ -30,7 +29,6 @@ async function searchData() {
 
     console.log("🔍 Search terms:", searchTerms);
 
-    // Hide table if no search terms
     if (searchTerms.every(term => term === "")) {
         document.getElementById("noSearchMessage").style.display = "block";
         document.getElementById("dataTable").style.display = "none";
@@ -39,7 +37,6 @@ async function searchData() {
 
     document.getElementById("noSearchMessage").style.display = "none";
 
-    // Fetch Excel data
     const jsonData = await fetchExcelData();
     if (jsonData.length === 0) {
         console.warn("⚠️ No data available.");
@@ -53,12 +50,10 @@ async function searchData() {
 
     console.log("🔎 Filtered Data:", filteredData);
 
-    // Get table elements
     const table = document.getElementById("dataTable");
     const tableHead = document.getElementById("tableHead");
     const tableBody = document.getElementById("tableBody");
 
-    // Clear previous results
     tableHead.innerHTML = "";
     tableBody.innerHTML = "";
 
@@ -68,7 +63,6 @@ async function searchData() {
         return;
     }
 
-    // Generate table headers
     const headers = Object.keys(jsonData[0]);
     headers.forEach(header => {
         const th = document.createElement("th");
@@ -76,17 +70,15 @@ async function searchData() {
         tableHead.appendChild(th);
     });
 
-    // Populate table rows
     filteredData.forEach(row => {
         const tr = document.createElement("tr");
-        let highlightRow = false; 
+        let highlightRow = false;
 
         headers.forEach(header => {
             const td = document.createElement("td");
             td.textContent = row[header];
 
-            // Highlight rows containing "CGPA"
-            if (td.textContent.trim().toLowerCase() === "cgpa") {
+            if (td.textContent.trim().toLowerCase().includes("cgpa")) {
                 highlightRow = true;
             }
 
@@ -94,7 +86,7 @@ async function searchData() {
         });
 
         if (highlightRow) {
-            tr.classList.add("highlight-row");
+            tr.style.backgroundColor = "yellow";
         }
 
         tableBody.appendChild(tr);
@@ -102,4 +94,3 @@ async function searchData() {
 
     table.style.display = "block";
 }
-
