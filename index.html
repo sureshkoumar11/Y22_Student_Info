@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Information</title>
-    
-    <!-- External Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
-    
+    <script src="Y22script.js" defer></script>
+
     <style>
         .top-section {
             text-align: center;
@@ -65,20 +64,24 @@
         <h2>Student Information</h2>
     </div>
     <br>
-    
-    <label for="searchInput1">Faculty Emp ID: </label>
-    <input type="text" id="searchInput1" placeholder="Enter Faculty Emp ID...">
-    <br><br>  
+        <label for="searchInput1">Faculty Emp ID: </label>
+        <input type="text" id="searchInput1" placeholder="Enter first search term...">
+          <button onclick="searchData()">Search</button>
+    <br>
+       <br>  
+        <input type="text" id="searchInput2" placeholder="Enter Student University ID...">
+        <input type="text" id="searchInput3" placeholder="Enter Course Code...">
+        <input type="text" id="searchInput4" placeholder="Enter Name of the Course...">
+        <input type="text" id="searchInput5" placeholder="Enter Course Bucket...">
+        <input type="text" id="searchInput6" placeholder="Enter Semester...">
+        <button onclick="searchData()">Search</button>
+        <br>
+       
+    </div>
 
-    <input type="text" id="searchInput2" placeholder="Enter Student University ID...">
-    <input type="text" id="searchInput3" placeholder="Enter Course Code...">
-    <input type="text" id="searchInput4" placeholder="Enter Name of the Course...">
-    <input type="text" id="searchInput5" placeholder="Enter Course Bucket...">
-    <input type="text" id="searchInput6" placeholder="Enter Semester...">
-    <button onclick="searchData()">Search</button>
-    
-    <br><br>
-    <p id="noSearchMessage" style="text-align: center;">Loading data, please wait...</p>
+    <br>
+
+    <p id="noSearchMessage" style="text-align: center;">Enter search terms to see results.</p>
 
     <div class="table-container">
         <table id="dataTable" border="1" style="display: none;">
@@ -88,8 +91,5 @@
             <tbody id="tableBody"></tbody>
         </table>
     </div>
-
-    <!-- JavaScript File -->
-    <script src="Y22script.js"></script>
 </body>
 </html>
