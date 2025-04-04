@@ -17,17 +17,17 @@ async function fetchExcelData() {
 }
 
 async function searchData() {
-    const searchInputs = [
-        document.getElementById("searchInput1").value.toLowerCase().trim(),
-        document.getElementById("searchInput2").value.toLowerCase().trim(),
-        document.getElementById("searchInput3").value.toLowerCase().trim(),
-        document.getElementById("searchInput4").value.toLowerCase().trim(),
-        document.getElementById("searchInput5").value.toLowerCase().trim(),
-        document.getElementById("searchInput6").value.toLowerCase().trim(),
-        document.getElementById("searchInput7").value.toLowerCase().trim()
+    const searchTerms = [
+        document.getElementById("searchInput1").value.toLowerCase().trim(), // Faculty Emp ID
+        document.getElementById("searchInput2").value.toLowerCase().trim(), // University ID
+        document.getElementById("searchInput3").value.toLowerCase().trim(), // Year
+        document.getElementById("searchInput4").value.toLowerCase().trim(), // Course Code
+        document.getElementById("searchInput5").value.toLowerCase().trim(), // Bucket
+        document.getElementById("searchInput6").value.toLowerCase().trim(), // Semester
+        document.getElementById("searchInput7").value.toLowerCase().trim()  // CGPA
     ];
 
-    if (searchInputs.every(term => term === "")) {
+    if (searchTerms.every(term => term === "")) {
         document.getElementById("noSearchMessage").style.display = "block";
         document.getElementById("dataTable").style.display = "none";
         return;
@@ -36,19 +36,18 @@ async function searchData() {
     document.getElementById("noSearchMessage").style.display = "none";
 
     const jsonData = await fetchExcelData();
-    if (jsonData.length === 0) {
-        console.warn("⚠️ No data available.");
-        return;
-    }
+    if (jsonData.length === 0) return;
 
     const headers = Object.keys(jsonData[0]);
 
     const filteredData = jsonData.filter(row => {
-        return searchInputs.every((term, index) => {
-            if (term === "") return true;
-            const header = headers[index];
-            const cellValue = row[header] ? row[header].toString().toLowerCase() : "";
-            return cellValue.includes(term);
+        return searchTerms.every((term, index) => {
+            if (!term) return true;
+
+            const header = headers[index]; // strictly match each input to its column
+            const cell = row[header] ? row[header].toString().toLowerCase() : "";
+
+            return cell.includes(term);
         });
     });
 
@@ -73,23 +72,11 @@ async function searchData() {
 
     filteredData.forEach(row => {
         const tr = document.createElement("tr");
-        let highlightRow = false;
-
         headers.forEach(header => {
             const td = document.createElement("td");
-            td.textContent = row[header];
-
-            if (td.textContent.trim().toLowerCase() === "cgpa") {
-                highlightRow = true;
-            }
-
+            td.textContent = row[header] || "";
             tr.appendChild(td);
         });
-
-        if (highlightRow) {
-            tr.classList.add("highlight-row");
-        }
-
         tableBody.appendChild(tr);
     });
 
