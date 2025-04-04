@@ -6,9 +6,7 @@ async function fetchExcelData() {
 
         const data = await response.arrayBuffer();
         const workbook = XLSX.read(data, { type: "array" });
-
         const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-        console.log("✅ Excel Data Loaded:", jsonData);
         return jsonData;
     } catch (error) {
         console.error("❌ Error loading Excel file:", error);
@@ -17,17 +15,28 @@ async function fetchExcelData() {
 }
 
 async function searchData() {
-    const searchTerms = [
-        document.getElementById("searchInput1").value.toLowerCase().trim(), // Faculty Emp ID
-        document.getElementById("searchInput2").value.toLowerCase().trim(), // University ID
-        document.getElementById("searchInput3").value.toLowerCase().trim(), // Year
-        document.getElementById("searchInput4").value.toLowerCase().trim(), // Course Code
-        document.getElementById("searchInput5").value.toLowerCase().trim(), // Bucket
-        document.getElementById("searchInput6").value.toLowerCase().trim(), // Semester
-        document.getElementById("searchInput7").value.toLowerCase().trim()  // CGPA
+    const jsonData = await fetchExcelData();
+    if (jsonData.length === 0) return;
+
+    // Map each input to its corresponding column
+    const searchMapping = [
+        { id: "searchInput1", column: "Faculty Emp ID" },
+        { id: "searchInput2", column: "University ID" },
+        { id: "searchInput3", column: "Year" },
+        { id: "searchInput4", column: "Course Code" },
+        { id: "searchInput5", column: "Bucket" },
+        { id: "searchInput6", column: "Semester" },
+        { id: "searchInput7", column: "CGPA" }
     ];
 
-    if (searchTerms.every(term => term === "")) {
+    const activeFilters = searchMapping
+        .map(({ id, column }) => {
+            const value = document.getElementById(id).value.toLowerCase().trim();
+            return value ? { column, value } : null;
+        })
+        .filter(Boolean);
+
+    if (activeFilters.length === 0) {
         document.getElementById("noSearchMessage").style.display = "block";
         document.getElementById("dataTable").style.display = "none";
         return;
@@ -35,19 +44,11 @@ async function searchData() {
 
     document.getElementById("noSearchMessage").style.display = "none";
 
-    const jsonData = await fetchExcelData();
-    if (jsonData.length === 0) return;
-
-    const headers = Object.keys(jsonData[0]);
-
+    // Only match each term in its corresponding column
     const filteredData = jsonData.filter(row => {
-        return searchTerms.every((term, index) => {
-            if (!term) return true;
-
-            const header = headers[index]; // strictly match each input to its column
-            const cell = row[header] ? row[header].toString().toLowerCase() : "";
-
-            return cell.includes(term);
+        return activeFilters.every(({ column, value }) => {
+            const cell = row[column] ? row[column].toString().toLowerCase() : "";
+            return cell.includes(value);
         });
     });
 
@@ -64,6 +65,7 @@ async function searchData() {
         return;
     }
 
+    const headers = Object.keys(jsonData[0]);
     headers.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
