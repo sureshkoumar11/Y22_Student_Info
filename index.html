@@ -1,193 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Information</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Information</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+  <script src="script.js" defer></script>
 
-    <style>
-        .top-section {
-            text-align: center;
-            margin-top: 10px;
-        }
-        input[type="text"] {
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin: 5px;
-        }
-        button {
-            padding: 7px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-            position: sticky;
-            top: 0;
-        }
-        .table-container {
-            max-height: 500px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-        }
-        .highlight-row {
-            background-color: yellow !important;
-        }
-        body {
-            background-color: lightblue;
-            font-family: Arial, sans-serif;
-        }
-    </style>
+  <style>
+    body {
+      background-color: lightblue;
+      font-family: Arial, sans-serif;
+    }
+    .top-section {
+      text-align: center;
+      margin-top: 10px;
+    }
+    input[type="text"] {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    button {
+      padding: 7px 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+      position: sticky;
+      top: 0;
+    }
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+    }
+    .highlight-row {
+      background-color: yellow !important;
+    }
+  </style>
 </head>
 <body>
-    <div class="top-section">
-        <h1>KLEF (Deemed to be University)</h1>
-        <h3>Department of Electronics and Communication Engineering</h3>
-        <h2>Student Information</h2>
-    </div>
-    <br>
-    <label for="searchInput1">Faculty Emp ID: </label>
-    <input type="text" id="searchInput1" placeholder="Enter Faculty Emp ID">
-    <button onclick="searchData()">Search</button>
-    <br><br>
-    <input type="text" id="searchInput2" placeholder="Enter Student University ID">
-    <input type="text" id="searchInput3" placeholder="Enter Student Year">
-    <input type="text" id="searchInput4" placeholder="Enter Course Code">
-    <input type="text" id="searchInput5" placeholder="Enter Course Bucket">
-    <input type="text" id="searchInput6" placeholder="Enter Semester">
-    <button onclick="searchData()">Search</button>
-    <br><br>
+  <div class="top-section">
+    <h1>KLEF (Deemed to be University)</h1>
+    <h3>Department of Electronics and Communication Engineering</h3>
+    <h2>Student Information</h2>
+  </div>
 
-    <p id="noSearchMessage" style="text-align: center;">Enter search terms to see results.</p>
+  <br />
+  <label for="searchInput1">Faculty Emp ID: </label>
+  <input type="text" id="searchInput1" placeholder="Enter Faculty Emp ID" />
+  <br /><br />
+  <input type="text" id="searchInput2" placeholder="Enter Student University ID" />
+  <input type="text" id="searchInput3" placeholder="Enter Student Year" />
+  <input type="text" id="searchInput4" placeholder="Enter Course Code" />
+  <input type="text" id="searchInput5" placeholder="Enter Course Bucket" />
+  <input type="text" id="searchInput6" placeholder="Enter Semester" />
+  <button onclick="searchData()">Search</button>
+  <br /><br />
 
-    <div class="table-container">
-        <table id="dataTable" border="1" style="display: none;">
-            <thead>
-                <tr id="tableHead"></tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-    </div>
+  <p id="noSearchMessage" style="text-align: center;">Enter search terms to see results.</p>
 
-    <script>
-        async function fetchExcelData() {
-            try {
-                const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/main/data.xlsx"; 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Failed to fetch Excel file");
-
-                const data = await response.arrayBuffer();
-                const workbook = XLSX.read(data, { type: "array" });
-
-                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                console.log("✅ Excel Data Loaded:", jsonData);
-                return jsonData;
-            } catch (error) {
-                console.error("❌ Error loading Excel file:", error);
-                return [];
-            }
-        }
-
-        async function searchData() {
-            const searchInputs = [
-                { id: "searchInput1", column: "Faculty Emp ID" },
-                { id: "searchInput2", column: "Student University ID" },
-                { id: "searchInput3", column: "Year" },
-                { id: "searchInput4", column: "Course Code" },
-                { id: "searchInput5", column: "Course Bucket" },
-                { id: "searchInput6", column: "Semester" }
-            ];
-
-            const searchTerms = searchInputs.map(input => {
-                return {
-                    column: input.column,
-                    value: document.getElementById(input.id).value.toLowerCase().trim()
-                };
-            });
-
-            if (searchTerms.every(term => term.value === "")) {
-                document.getElementById("noSearchMessage").style.display = "block";
-                document.getElementById("dataTable").style.display = "none";
-                return;
-            }
-
-            document.getElementById("noSearchMessage").style.display = "none";
-
-            const jsonData = await fetchExcelData();
-            if (jsonData.length === 0) {
-                console.warn("⚠️ No data available.");
-                return;
-            }
-
-            const filteredData = jsonData.filter(row => {
-                return searchTerms.every(term => {
-                    if (term.value === "") return true;
-                    const cellValue = (row[term.column] || "").toString().toLowerCase();
-                    return cellValue.includes(term.value);
-                });
-            });
-
-            const table = document.getElementById("dataTable");
-            const tableHead = document.getElementById("tableHead");
-            const tableBody = document.getElementById("tableBody");
-
-            tableHead.innerHTML = "";
-            tableBody.innerHTML = "";
-
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = "<tr><td colspan='100%'>No matching results found.</td></tr>";
-                table.style.display = "block";
-                return;
-            }
-
-            const headers = Object.keys(jsonData[0]);
-            headers.forEach(header => {
-                const th = document.createElement("th");
-                th.textContent = header;
-                tableHead.appendChild(th);
-            });
-
-            filteredData.forEach(row => {
-                const tr = document.createElement("tr");
-                let highlightRow = false;
-
-                headers.forEach(header => {
-                    const td = document.createElement("td");
-                    td.textContent = row[header];
-
-                    if (td.textContent.trim().toLowerCase() === "cgpa") {
-                        highlightRow = true;
-                    }
-
-                    tr.appendChild(td);
-                });
-
-                if (highlightRow) {
-                    tr.classList.add("highlight-row");
-                }
-
-                tableBody.appendChild(tr);
-            });
-
-            table.style.display = "block";
-        }
-    </script>
+  <div class="table-container">
+    <table id="dataTable" border="1" style="display: none;">
+      <thead>
+        <tr id="tableHead"></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 </body>
 </html>
