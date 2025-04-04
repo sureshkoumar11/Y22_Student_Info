@@ -1,104 +1,91 @@
 async function fetchExcelData() {
-    try {
-        const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/main/data.xlsx"; 
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch Excel file");
+  try {
+    const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/main/data.xlsx";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch Excel file");
 
-        const data = await response.arrayBuffer();
-        const workbook = XLSX.read(data, { type: "array" });
+    const data = await response.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array" });
+    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
-        // Convert the first sheet into JSON format
-        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-
-        console.log("✅ Excel Data Loaded:", jsonData);
-        return jsonData;
-    } catch (error) {
-        console.error("❌ Error loading Excel file:", error);
-        return [];
-    }
+    console.log("✅ Excel Data Loaded:", jsonData);
+    return jsonData;
+  } catch (error) {
+    console.error("❌ Error loading Excel file:", error);
+    return [];
+  }
 }
 
 async function searchData() {
-    const searchTerms = [
-        document.getElementById("searchInput1").value.toLowerCase().trim(),
-        document.getElementById("searchInput2").value.toLowerCase().trim(),
-        document.getElementById("searchInput3").value.toLowerCase().trim(),
-        document.getElementById("searchInput4").value.toLowerCase().trim(),
-        document.getElementById("searchInput5").value.toLowerCase().trim(),
-        document.getElementById("searchInput6").value.toLowerCase().trim()
-    ];
+  const jsonData = await fetchExcelData();
+  if (jsonData.length === 0) return;
 
-    console.log("🔍 Search terms:", searchTerms);
+  const table = document.getElementById("dataTable");
+  const tableHead = document.getElementById("tableHead");
+  const tableBody = document.getElementById("tableBody");
 
-    // Hide table if no search terms
-    if (searchTerms.every(term => term === "")) {
-        document.getElementById("noSearchMessage").style.display = "block";
-        document.getElementById("dataTable").style.display = "none";
-        return;
-    }
+  const searchTerms = {
+    "Faculty Emp ID": document.getElementById("searchInput1").value.toLowerCase().trim(),
+    "Student University ID": document.getElementById("searchInput2").value.toLowerCase().trim(),
+    "Year": document.getElementById("searchInput3").value.toLowerCase().trim(),
+    "Course Code": document.getElementById("searchInput4").value.toLowerCase().trim(),
+    "Course Bucket": document.getElementById("searchInput5").value.toLowerCase().trim(),
+    "Semester": document.getElementById("searchInput6").value.toLowerCase().trim()
+  };
 
-    document.getElementById("noSearchMessage").style.display = "none";
-
-    // Fetch Excel data
-    const jsonData = await fetchExcelData();
-    if (jsonData.length === 0) {
-        console.warn("⚠️ No data available.");
-        return;
-    }
-
-    const filteredData = jsonData.filter(row => {
-        const rowValues = Object.values(row).map(value => value.toString().toLowerCase());
-        return searchTerms.every(term => term === "" || rowValues.some(value => value.includes(term)));
+  const filteredData = jsonData.filter(row => {
+    return Object.entries(searchTerms).every(([col, term]) => {
+      if (term === "") return true;
+      const cellValue = (row[col] || "").toString().toLowerCase();
+      return cellValue.includes(term);
     });
+  });
 
-    console.log("🔎 Filtered Data:", filteredData);
+  tableHead.innerHTML = "";
+  tableBody.innerHTML = "";
 
-    // Get table elements
-    const table = document.getElementById("dataTable");
-    const tableHead = document.getElementById("tableHead");
-    const tableBody = document.getElementById("tableBody");
+  if (Object.values(searchTerms).every(v => v === "")) {
+    document.getElementById("noSearchMessage").style.display = "block";
+    table.style.display = "none";
+    return;
+  }
 
-    // Clear previous results
-    tableHead.innerHTML = "";
-    tableBody.innerHTML = "";
+  document.getElementById("noSearchMessage").style.display = "none";
 
-    if (filteredData.length === 0) {
-        tableBody.innerHTML = "<tr><td colspan='100%'>No matching results found.</td></tr>";
-        table.style.display = "block";
-        return;
-    }
-
-    // Generate table headers
-    const headers = Object.keys(jsonData[0]);
-    headers.forEach(header => {
-        const th = document.createElement("th");
-        th.textContent = header;
-        tableHead.appendChild(th);
-    });
-
-    // Populate table rows
-    filteredData.forEach(row => {
-        const tr = document.createElement("tr");
-        let highlightRow = false; 
-
-        headers.forEach(header => {
-            const td = document.createElement("td");
-            td.textContent = row[header];
-
-            // Highlight rows containing "CGPA"
-            if (td.textContent.trim().toLowerCase() === "cgpa") {
-                highlightRow = true;
-            }
-
-            tr.appendChild(td);
-        });
-
-        if (highlightRow) {
-            tr.classList.add("highlight-row");
-        }
-
-        tableBody.appendChild(tr);
-    });
-
+  if (filteredData.length === 0) {
+    tableBody.innerHTML = "<tr><td colspan='100%'>No matching results found.</td></tr>";
     table.style.display = "block";
+    return;
+  }
+
+  const headers = Object.keys(jsonData[0]);
+  headers.forEach(header => {
+    const th = document.createElement("th");
+    th.textContent = header;
+    tableHead.appendChild(th);
+  });
+
+  filteredData.forEach(row => {
+    const tr = document.createElement("tr");
+    let highlightRow = false;
+
+    headers.forEach(header => {
+      const td = document.createElement("td");
+      td.textContent = row[header] ?? "";
+
+      if (td.textContent.trim().toLowerCase() === "cgpa") {
+        highlightRow = true;
+      }
+
+      tr.appendChild(td);
+    });
+
+    if (highlightRow) {
+      tr.classList.add("highlight-row");
+    }
+
+    tableBody.appendChild(tr);
+  });
+
+  table.style.display = "block";
 }
