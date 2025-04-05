@@ -1,48 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Information</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
-  <script src="Y22script.js" defer></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+    <script src="Y22script.js" defer></script>
+
+    <style>
+        .top-section {
+            text-align: center;
+            margin-top: 10px;
+        }
+        input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        button {
+            padding: 7px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .highlight-row {
+            background-color: yellow !important;
+        }
+        body {
+            background-color: lightblue;
+            font-family: Arial, sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-blue-100 font-sans">
-  <div class="p-6 max-w-6xl mx-auto">
-    <div class="text-center space-y-2">
-      <h1 class="text-3xl font-bold">KLEF (Deemed to be University)</h1>
-      <h3 class="text-xl">Department of Electronics and Communication Engineering</h3>
-      <h2 class="text-2xl font-semibold">Student Information</h2>
+<body>
+    <div class="top-section">
+        <h1>KLEF (Deemed to be University)</h1>
+        <h3>Department of Electronics and Communication Engineering</h3>
+        <h2>Student Information</h2>
     </div>
+    <br>
+<label for="searchInput1">Faculty Emp ID: </label>
+<input type="text" id="searchInput1" placeholder="Faculty Emp ID">
+    <button onclick="searchData()">Search</button>
+<br><br>
+<input type="text" id="searchInput2" placeholder="Student University ID">
+<input type="text" id="searchInput3" placeholder="Student Year">
+<input type="text" id="searchInput4" placeholder="Course Code">
+<input type="text" id="searchInput5" placeholder="Name of the Course">
+<input type="text" id="searchInput6" placeholder="Bucket">
+<input type="text" id="searchInput7" placeholder="Semester">
+<button onclick="searchData()">Search</button>
 
-    <div class="mt-8 bg-white p-6 rounded-lg shadow space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <input id="searchInput1" type="text" placeholder="Faculty Emp ID" class="border p-2 rounded">
-        <input id="searchInput2" type="text" placeholder="University ID" class="border p-2 rounded">
-        <input id="searchInput3" type="text" placeholder="Year" class="border p-2 rounded">
-        <input id="searchInput4" type="text" placeholder="Course Code" class="border p-2 rounded">
-        <input id="searchInput5" type="text" placeholder="Course Bucket" class="border p-2 rounded">
-        <input id="searchInput6" type="text" placeholder="Semester" class="border p-2 rounded">
-        <input id="searchInput7" type="text" placeholder="CGPA" class="border p-2 rounded">
-      </div>
-      <div class="text-center">
-        <button onclick="searchData()" class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded">
-          Search
-        </button>
-      </div>
-    </div>
+<p id="noSearchMessage" style="text-align: center;">Enter search terms to see results.</p>
 
-    <p id="noSearchMessage" class="text-center mt-4 text-gray-700">Enter search terms to see results.</p>
-
-    <div class="mt-6 overflow-x-auto">
-      <table id="dataTable" class="min-w-full table-auto border-collapse border border-gray-300 hidden">
-        <thead class="bg-gray-200 sticky top-0">
-          <tr id="tableHead"></tr>
+<div class="table-container">
+    <table id="dataTable" border="1" style="display: none;">
+        <thead>
+            <tr id="tableHead"></tr>
         </thead>
         <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-  </div>
+    </table>
+</div>
 </body>
 </html>
