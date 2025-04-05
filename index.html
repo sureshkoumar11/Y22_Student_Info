@@ -73,11 +73,14 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.overlay {
-  background-color: rgba(0, 0, 0, 0.1); /* Black with 50% opacity */
-  min-height: 100vh; /* Full height of the screen */
-  padding: 20px;
-  color: white; /* Makes text visible over dark overlay */
+.table-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  background-color: rgba(255, 255, 255, 0.8); /* semi-transparent white */
+  backdrop-filter: blur(5px); /* Optional: blur background behind the table */
+  padding: 10px;
+  border-radius: 8px;
 }
   </style>
 </head>
