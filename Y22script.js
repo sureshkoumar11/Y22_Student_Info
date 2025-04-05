@@ -7,7 +7,7 @@ async function fetchExcelData() {
         const data = await response.arrayBuffer();
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Get as 2D array
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         console.log("✅ Excel Raw Data:", jsonData);
         return jsonData;
@@ -18,6 +18,8 @@ async function fetchExcelData() {
 }
 
 async function searchData() {
+    const globalSearch = document.getElementById("searchInputGlobal").value.toLowerCase().trim();
+
     const searchTerms = [
         document.getElementById("searchInput1").value.toLowerCase().trim(),
         document.getElementById("searchInput2").value.toLowerCase().trim(),
@@ -27,7 +29,9 @@ async function searchData() {
         document.getElementById("searchInput6").value.toLowerCase().trim()
     ];
 
-    if (searchTerms.every(term => term === "")) {
+    const allEmpty = searchTerms.every(term => term === "") && globalSearch === "";
+
+    if (allEmpty) {
         document.getElementById("noSearchMessage").style.display = "block";
         document.getElementById("dataTable").style.display = "none";
         return;
@@ -41,13 +45,21 @@ async function searchData() {
     const headers = rawData[0];
     const rows = rawData.slice(1);
 
-    const filteredRows = rows.filter(row =>
-        searchTerms.every((term, index) => {
+    const filteredRows = rows.filter(row => {
+        // Match column-specific search
+        const columnMatch = searchTerms.every((term, index) => {
             if (!term) return true;
             const cell = row[index] ?? "";
             return cell.toString().toLowerCase().includes(term);
-        })
-    );
+        });
+
+        // Match global search
+        const globalMatch = !globalSearch || row.some(cell =>
+            cell?.toString().toLowerCase().includes(globalSearch)
+        );
+
+        return columnMatch && globalMatch;
+    });
 
     const table = document.getElementById("dataTable");
     const tableHead = document.getElementById("tableHead");
@@ -56,21 +68,18 @@ async function searchData() {
     tableHead.innerHTML = "";
     tableBody.innerHTML = "";
 
-    // Set headers
     headers.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
         tableHead.appendChild(th);
     });
 
-    // Handle no results
     if (filteredRows.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="${headers.length}">No matching results found.</td></tr>`;
         table.style.display = "block";
         return;
     }
 
-    // Add filtered rows
     filteredRows.forEach(row => {
         const tr = document.createElement("tr");
 
