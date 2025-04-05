@@ -59,17 +59,28 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+.background-blur {
   background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  font-family: Arial, sans-serif;
+  filter: blur(8px) brightness(0.6); /* Adjust blur and darkness */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
-.overlay {
-  background-color: rgba(0, 0, 0, 0); /* Black with 50% opacity */
-  min-height: 100vh; /* Full height of the screen */
+
+.content {
+  position: relative;
+  z-index: 1;
   padding: 20px;
-  color: white; /* Makes text visible over dark overlay */
+  color: white;
 }
   </style>
 </head>
