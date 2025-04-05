@@ -1,42 +1,16 @@
-async function fetchExcelData() {
-    try {
-        const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/main/data.xlsx"; 
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch Excel file");
-
-        const data = await response.arrayBuffer();
-        const workbook = XLSX.read(data, { type: "array" });
-        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-        return jsonData;
-    } catch (error) {
-        console.error("❌ Error loading Excel file:", error);
-        return [];
-    }
-}
-
 async function searchData() {
-    const jsonData = await fetchExcelData();
-    if (jsonData.length === 0) return;
-
-    // Map each input to its corresponding column
-    const searchMapping = [
-        { id: "searchInput1", column: "Faculty Emp ID" },
-        { id: "searchInput2", column: "University ID" },
-        { id: "searchInput3", column: "Year" },
-        { id: "searchInput4", column: "Course Code" },
-        { id: "searchInput5", column: "Bucket" },
-        { id: "searchInput6", column: "Semester" },
-        { id: "searchInput7", column: "CGPA" }
+    const searchTerms = [
+        document.getElementById("searchInput1").value.toLowerCase().trim(),
+        document.getElementById("searchInput2").value.toLowerCase().trim(),
+        document.getElementById("searchInput3").value.toLowerCase().trim(),
+        document.getElementById("searchInput4").value.toLowerCase().trim(),
+        document.getElementById("searchInput5").value.toLowerCase().trim(),
+        document.getElementById("searchInput6").value.toLowerCase().trim()
     ];
 
-    const activeFilters = searchMapping
-        .map(({ id, column }) => {
-            const value = document.getElementById(id).value.toLowerCase().trim();
-            return value ? { column, value } : null;
-        })
-        .filter(Boolean);
+    console.log("🔍 Search terms:", searchTerms);
 
-    if (activeFilters.length === 0) {
+    if (searchTerms.every(term => term === "")) {
         document.getElementById("noSearchMessage").style.display = "block";
         document.getElementById("dataTable").style.display = "none";
         return;
@@ -44,13 +18,18 @@ async function searchData() {
 
     document.getElementById("noSearchMessage").style.display = "none";
 
-    // Only match each term in its corresponding column
+    const jsonData = await fetchExcelData();
+    if (jsonData.length === 0) {
+        console.warn("⚠️ No data available.");
+        return;
+    }
+
     const filteredData = jsonData.filter(row => {
-        return activeFilters.every(({ column, value }) => {
-            const cell = row[column] ? row[column].toString().toLowerCase() : "";
-            return cell.includes(value);
-        });
+        const rowValues = Object.values(row).map(value => value.toString().toLowerCase());
+        return searchTerms.every(term => term === "" || rowValues.some(value => value.includes(term)));
     });
+
+    console.log("🔎 Filtered Data:", filteredData);
 
     const table = document.getElementById("dataTable");
     const tableHead = document.getElementById("tableHead");
@@ -65,7 +44,10 @@ async function searchData() {
         return;
     }
 
-    const headers = Object.keys(jsonData[0]);
+    // Get only the first 7 keys from the first row as headers
+    const allHeaders = Object.keys(jsonData[0]);
+    const headers = allHeaders.slice(0, 7);
+
     headers.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
@@ -74,11 +56,23 @@ async function searchData() {
 
     filteredData.forEach(row => {
         const tr = document.createElement("tr");
+        let highlightRow = false;
+
         headers.forEach(header => {
             const td = document.createElement("td");
-            td.textContent = row[header] || "";
+            td.textContent = row[header] !== undefined ? row[header] : "";
+
+            if (td.textContent.trim().toLowerCase() === "cgpa") {
+                highlightRow = true;
+            }
+
             tr.appendChild(td);
         });
+
+        if (highlightRow) {
+            tr.classList.add("highlight-row");
+        }
+
         tableBody.appendChild(tr);
     });
 
