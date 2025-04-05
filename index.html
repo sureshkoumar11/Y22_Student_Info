@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Information</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+    <script src="Y22script.js" defer></script>
+
     <style>
         .top-section {
             text-align: center;
@@ -62,16 +64,22 @@
         <h2>Student Information</h2>
     </div>
     <br>
-    <label for="searchInput1">Faculty Emp ID: </label>
-    <input type="text" id="searchInput1" placeholder="Enter first search term...">
-    <button onclick="searchData()">Search</button>
-    <br><br>
-    <input type="text" id="searchInput2" placeholder="Enter Student University ID...">
-    <input type="text" id="searchInput3" placeholder="Enter Student Year...">
-    <input type="text" id="searchInput4" placeholder="Enter Course Code...">
-    <input type="text" id="searchInput5" placeholder="Enter Course Bucket...">
-    <input type="text" id="searchInput6" placeholder="Enter Semester...">
-    <button onclick="searchData()">Search</button>
+        <label for="searchInput1">Faculty Emp ID: </label>
+        <input type="text" id="searchInput1" placeholder="Enter first search term...">
+          <button onclick="searchData()">Search</button>
+    <br>
+       <br>  
+        <input type="text" id="searchInput2" placeholder="Enter Student University ID...">
+        <input type="text" id="searchInput3" placeholder="Enter Student Year...">
+        <input type="text" id="searchInput4" placeholder="Enter Course Code...">
+        <input type="text" id="searchInput5" placeholder="Enter Course Bucket...">
+        <input type="text" id="searchInput6" placeholder="Enter Semester...">
+        <button onclick="searchData()">Search</button>
+        <br>
+       
+    </div>
+
+    <br>
 
     <p id="noSearchMessage" style="text-align: center;">Enter search terms to see results.</p>
 
@@ -83,106 +91,5 @@
             <tbody id="tableBody"></tbody>
         </table>
     </div>
-
-    <script>
-        async function fetchExcelData() {
-            try {
-                const url = "https://raw.githubusercontent.com/sureshkoumar11/Y22_Student_Info/main/data.xlsx"; 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Failed to fetch Excel file");
-
-                const data = await response.arrayBuffer();
-                const workbook = XLSX.read(data, { type: "array" });
-
-                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                console.log("✅ Excel Data Loaded:", jsonData);
-                return jsonData;
-            } catch (error) {
-                console.error("❌ Error loading Excel file:", error);
-                return [];
-            }
-        }
-
-        async function searchData() {
-            const searchTerms = [
-                document.getElementById("searchInput1").value.toLowerCase().trim(),
-                document.getElementById("searchInput2").value.toLowerCase().trim(),
-                document.getElementById("searchInput3").value.toLowerCase().trim(),
-                document.getElementById("searchInput4").value.toLowerCase().trim(),
-                document.getElementById("searchInput5").value.toLowerCase().trim(),
-                document.getElementById("searchInput6").value.toLowerCase().trim()
-            ];
-
-            console.log("🔍 Search terms:", searchTerms);
-
-            if (searchTerms.every(term => term === "")) {
-                document.getElementById("noSearchMessage").style.display = "block";
-                document.getElementById("dataTable").style.display = "none";
-                return;
-            }
-
-            document.getElementById("noSearchMessage").style.display = "none";
-
-            const jsonData = await fetchExcelData();
-            if (jsonData.length === 0) {
-                console.warn("⚠️ No data available.");
-                return;
-            }
-
-            const filteredData = jsonData.filter(row => {
-                const rowValues = Object.values(row).map(value => value.toString().toLowerCase());
-                return searchTerms.every(term => term === "" || rowValues.some(value => value.includes(term)));
-            });
-
-            console.log("🔎 Filtered Data:", filteredData);
-
-            const table = document.getElementById("dataTable");
-            const tableHead = document.getElementById("tableHead");
-            const tableBody = document.getElementById("tableBody");
-
-            tableHead.innerHTML = "";
-            tableBody.innerHTML = "";
-
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = "<tr><td colspan='100%'>No matching results found.</td></tr>";
-                table.style.display = "block";
-                return;
-            }
-
-            // Limit to first 7 columns
-            const allHeaders = Object.keys(jsonData[0]);
-            const headers = allHeaders.slice(0, 7);
-
-            headers.forEach(header => {
-                const th = document.createElement("th");
-                th.textContent = header;
-                tableHead.appendChild(th);
-            });
-
-            filteredData.forEach(row => {
-                const tr = document.createElement("tr");
-                let highlightRow = false;
-
-                headers.forEach(header => {
-                    const td = document.createElement("td");
-                    td.textContent = row[header] !== undefined ? row[header] : "";
-
-                    if (td.textContent.trim().toLowerCase() === "cgpa") {
-                        highlightRow = true;
-                    }
-
-                    tr.appendChild(td);
-                });
-
-                if (highlightRow) {
-                    tr.classList.add("highlight-row");
-                }
-
-                tableBody.appendChild(tr);
-            });
-
-            table.style.display = "block";
-        }
-    </script>
 </body>
 </html>
